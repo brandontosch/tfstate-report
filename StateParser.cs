@@ -54,6 +54,45 @@ namespace tfstate_report
             return roleStatsList.ToArray();
         }
 
+        public Summary GetSummary(RoleStats[] roleStats)
+        {
+            var vms = new Dictionary<string, Dictionary<string, int>>();
+            var storage = new Dictionary<string, int>();
+
+            foreach (var role in roleStats)
+            {
+                foreach (var vm in role.VMs)
+                {
+                    if (!vms.ContainsKey(vm.OS))
+                    {
+                        vms.Add(vm.OS, new Dictionary<string, int>());
+                    }
+
+                    if (!vms[vm.OS].ContainsKey(vm.Size))
+                    {
+                        vms[vm.OS].Add(vm.Size, 0);
+                    }
+
+                    vms[vm.OS][vm.Size]++;
+
+                    foreach (var disk in vm.Disks)
+                    {
+                        if (!storage.ContainsKey(disk.Type))
+                        {
+                            storage.Add(disk.Type, 0);
+                        }
+
+                        storage[disk.Type] += disk.Size;
+                    }
+                }
+            }
+
+            var summary = new Summary();
+            summary.VMs = vms;
+            summary.Storage = storage;
+            return summary;
+        }
+
         private RoleStats GetRoleStats(JToken module)
         {
             JArray path = (JArray)module["path"];

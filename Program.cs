@@ -8,10 +8,20 @@ namespace tfstate_report
     {
         static void Main(string[] args)
         {
-            string stateFile = args[0];
-            StateParser stateParser = new StateParser(stateFile);
+            var reportType = args[0];
+            var stateFile = args[1];
+            var stateParser = new StateParser(stateFile);
             RoleStats[] roleStats = stateParser.ParseState();
-            Console.Write(JsonConvert.SerializeObject(roleStats));
+
+            if (string.Equals(reportType, "summary", StringComparison.OrdinalIgnoreCase))
+            {
+                Summary summary = stateParser.GetSummary(roleStats);
+                Console.Write(JsonConvert.SerializeObject(summary));
+            }
+            else
+            {
+                Console.Write(JsonConvert.SerializeObject(roleStats));
+            }
         }
     }
 }
